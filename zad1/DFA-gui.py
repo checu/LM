@@ -22,7 +22,7 @@ def zwroc_stan(suma, nominal):
         print(suma, 5)
 
     if suma == 0:
-        print("Zwrot monet")
+        print("Zwrot monet.")
 
     print ("Saldo wynosi", suma, "zl")
     return suma
