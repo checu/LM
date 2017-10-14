@@ -19,96 +19,90 @@ state_table = [
     [11, 11, 11, 11, 11, 11, 11, 11, 11, 11]
 ]
 
-# wczytywanie ciagow z pliku
-ciag = open("Ciagi.txt", 'r')
-examples = ciag.read()
-ciag.close()
-
-sequence_table = str(examples).split('\n')
-
-# print(sequence_table)
+line=''
+index=0
+step=[]
+steps_table=[]
 alphabet = "0123456789"
+#-------------------------------------funkcje-----------------------------------------------------
+
+#zmiana graficzna na przyciskach- funckja interakcja z GUI
+def button_clear():
+    for s in range(0, len(buttons)):
+        buttons[s].configure(bg="white")
+
 def state_change(state):
     global buttons
     global state_results
-    global lp
+
     state_results.append(state)
-    for s in range(0, len(buttons)):
-        buttons[s].configure(bg="white")
+    button_clear()
+
     for item in state:
         if item==-1:
             pass
         else:
-            buttons[item].config(bg="#FF0066")
-
+            if item==11:
+                buttons[11].config(bg="green")
+            else:
+                buttons[item].config(bg="#FF0066")
 
     result.set("tablica,stanow przejsciowych:" + str(state_results))
 
-# funckjaliczaca
+# -------------------------fatyczny algorytm NFA--------------------------------------------
 def NFA(element, prev_state):
     if element in alphabet:
         state = state_table[0][int(element)]+ [(state_table[prev_state][int(element)])]
     return state
 
+#-----------------------------Button:automat ------------------------------------
+def automat():
+    if index<len(list(line)):
+        state_change(NFA_cal_step(line))
+        root.after(2000,automat)
 
-# funkcja przetwarzajaca:
-def NFA_cal(sequence):
-    steps_table = []
-    elements = list(sequence)
-    index = 0
-    for element in elements:
-        #time.sleep(0.2)
-        index += 1
-        if index == 1:
-            state = state_table[0][int(element)]
-        else:
-            state = NFA(element, max(steps_table[index-2]))
-
-        result.set("aktualny stan:" + str(state))
-        state_change(state)
-        steps_table.append(state)
-    return steps_table
-#-----------------------------step by step ------------------------------------
-line=''
-lp=0
-step=[]
-steps_table=[]
-
-def NFA_cal_step(digit):
-    global lp
+#-----------------------------Button:step by step ------------------------------------
+def NFA_cal_step(chain):
+    global index
     global step
-    cos= list(digit)
+    global step_by_step
     global steps_table
-    if lp<len(cos):
-        charter = cos[lp]
-        if lp==0:
+    list_signs= list(chain)
+
+    if index<len(list_signs):
+        charter = list_signs[index]
+
+        if index==0:
             state = state_table[0][int(charter)]
         else:
-            state = NFA(charter, max(steps_table[lp-1]))
-        result.set("aktualny stan:" + str(state))
+            state = NFA(charter, max(steps_table[index - 1]))
+
         step = state
         steps_table.append(state)
-        
-    else:
-        next.config(state=DISABLED)
-    lp += 1
+
+    index += 1
+    if index==len(list_signs):
+        step_by_step.configure(state=DISABLED)
     return step
 
 
 
 
-#----------------------------------------------Koniec funkcji------------------------------------------------------------
+#----------------------------------------------GUI------------------------------------------------------------
+ex = 0
+state_results=[]
+
 
 root = tkinter.Tk()
 
-#wczytywanie ciagow z pliku
+#---------------------------------wczytywanie ciagow z pliku(nowa linia)---------------------
 ciag=open("Ciagi.txt",'r')
 examples=ciag.read()
 ciag.close()
 
 sequence_table=str(examples).split('\n')#tablica z przykładami
 
-#wyswietlacze
+#-----------------------------------wyswietlacz------------------------------
 chain=StringVar()
 result=StringVar()
 
@@ -123,40 +117,45 @@ result.set("tablica,stanow przejsciowych:")
 etykieta.pack()
 result_label.pack(side=BOTTOM)
 
-ex = 0
-state_results=[]
-#guziki funkcyjne
+
+#--------------------------------------------nowa sekwencja pobieranie---------------------------------------
 def next_sequence():
     del state_results[:]
     global ex
-    ex += 1
+    # ex += 1
     if ex<len(sequence_table):
         sequence=sequence_table[ex]
         chain.set(str(sequence))
-        #ex += 1
+        ex += 1
     else:
         exit()
+
     return sequence
 
-
+#---------------------------------------------Button: next Line-----------------------------------------
 
 def next_line():
     global line
     line=next_sequence()
-    lp=0
+    global index
+    global steps_table
+    global step_by_step
+    index=0
     steps_table=[]
+    step_by_step.configure(state=ACTIVE)
+    button_clear()
+    result.set("tablica,stanow przejsciowych:" + str(steps_table))
 
-
-
+#---------------------------------------------Buttons----------------------------------------------
 step_by_step=Button(root,text="Krok po kroku",command=lambda:state_change(NFA_cal_step(line)))
-run=Button(root,text="Automat",command=lambda:NFA_cal(line))
+auto=Button(root, text="Automat", command=lambda:automat())
 next=Button(root,text=">>>", command=lambda:next_line())
 step_by_step.pack()
-run.pack()
+auto.pack()
 next.pack()
 
 
-#guziki stanów mam już tablice obiektów
+#----------------------------------------guziki stanow-create--------------------------------------
 def state_disp():
     button_table=[]
     for i in range(0,12):
@@ -165,6 +164,8 @@ def state_disp():
     return button_table
 
 buttons=state_disp()
+
+
 root.mainloop()
 
 
