@@ -47,11 +47,6 @@ def NFA_cal(sequence):
 
             steps_table.append(state)
 
-        # else:
-        #     if any(11 in tup for tup in steps_table):
-        #         state = state_table[11][int(element)]
-        #         steps_table.append(state)
-        #         print("cudowny ciag")
         else:
             state = NFA(element, max(steps_table[index-2]))
 
