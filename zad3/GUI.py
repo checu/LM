@@ -1,7 +1,7 @@
 import tkinter
 from tkinter import *
-import time
-from tkinter import messagebox
+from Algorythm import *
+
 
 root = tkinter.Tk()
 root.geometry("320x400")
@@ -18,20 +18,20 @@ triangle = Canvas(root,width=canvas_width,height=canvas_height,background='#BABA
 triangle.pack()
 
 points = [20,60,40,60,30,85]
-triangle.create_polygon(points, fill='black', width=3)
-triangle.pack()
+triangle.create_polygon(points, fill='black', width=5)
+
+title=Label(root,text="Maszyna Turinga- zwiekszanie liczby rzeczysiwstej o 3",relief='groove')
+title.place(x=17,y=0)
 
 def tape_disp():
     tape_table=[]
     for i in range(0,16):
         tape_table.append(Button(root,text="#",relief=GROOVE))
-        tape_table[i].place(x=3+i*20,y=100)
+        tape_table[i].place(x=2+i*20,y=100)
 
     return tape_table
 
 tape=tape_disp()
-
-
 
 def state_disp():
     button_table=[]
