@@ -4,7 +4,7 @@ from tkinter import *
 # maszyna Turinga: "+3" do liczby rzeczywistej
 
 alphabet ="-123456789"
-
+points = [0,60,20,60,10,85]
 
 state_table=[
             [[0,"","P"],[2,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"],[1,"","P"]],
@@ -25,20 +25,29 @@ def button_clear():
     for s in range(0, len(buttons)):
         buttons[s].configure(bg="white")
 
-def state_change(state,tape):# przesunięcie glowicy prawo lewo, aktualny stan Q ina label i update taśmy
+def state_change(state):# przesunięcie glowicy prawo lewo, aktualny stan Q ina label i update taśmy
     global buttons
+    global tape
+    global points
     button_clear()
     tape_disp(tape)
     state_value.set("Aktualny stan:"+str(state))
     if state[0]==-1:
-        buttons[11].config(bg="red")
+        buttons[11].config(bg="#9F303E")
+    elif state[0]==10:
+        buttons[10].config(bg="#A2CFB7")
     else:
-        buttons[state[0]].config(bg="blue")
+        buttons[state[0]].config(bg="#CDB5C4")
+    if state[2]=="P":
+        triangle.move(tom,20,0)
+    if state[2]=="L":
+        triangle.move(tom, -20, 0)
+
 
 def auto():
-    if start < 3:
-        Turing_Machine(sequences)
-        root.after(2000, auto)
+    if state[0] != 10:
+        state_change(Turing_Machine(charters))
+        root.after(1000, auto)
 
 
 tape=[]
@@ -51,43 +60,41 @@ sequences = str(chains).split('\n')
 
 start = 0
 #turing
+
+tape=[]
+index = 0
+charters=sequences[index]
+tape=list(charters)
+state=state_table[0][0]
+lista=[]
+
 def Turing_Machine(sequence):
-    tape=[]
-    index = 0
-    charters=sequences[index]
-    tape=list(charters)
-    state=state_table[0][0]
-    lista=[]
+    global index
     global start
-    while state[0]!=10:
+    global state
+    charter=tape[index]
 
-        charter=tape[index]
+    if charter == "#":
+        charter = -2
+    elif charter == "-":
+        charter = -1
 
+    if start==0:
+        state = state_table[0][int(charter)+2]
+    else:
+        state=state_table[state[0]][int(charter)+2]
 
-        if charter == "#":
-            charter = -2
-        elif charter == "-":
-            charter = -1
+        if state[1]!="":
+            tape[index]=state[1]
 
-        if start==0:
-            state = state_table[0][int(charter)+2]
-        else:
-            state=state_table[state[0]][int(charter)+2]
-
-            if state[1]!="":
-                tape[index]=state[1]
-
-        if state[2] == "P":
-            index += 1
-        elif state[2] == "L":
-            index -= 1
-        root.after(2000,state_change(state,tape))
-        # state_change(state)
-        # tape_disp(tape)
-        start+=1
-        lista.append(state)
-        print(state)
-        print(tape)
+    if state[2] == "P":
+        index += 1
+    elif state[2] == "L":
+        index -= 1
+    start+=1
+    lista.append(state)
+    print(state)
+    print(tape)
 
     return state
     print(lista)
@@ -99,32 +106,32 @@ def Turing_Machine(sequence):
 #----------------------------------------------GUI--------------------------------------------------------
 root = tkinter.Tk()
 root.geometry("320x400")
-root.configure(background='#BABABA')
+root.configure(background='#F0FFF0')
 
-frame_film=Frame(root, width=320, height=50, background="#646464", relief='groove',bd=2)
+frame_film=Frame(root, width=320, height=50, background="#236666", relief='groove',bd=2)
 frame_film.place(x=0,y=88)
 
 canvas_width = 320
 canvas_height =88
 
 #-------------------------trojkat mocy;p----------------------------
-triangle = Canvas(root,width=canvas_width,height=canvas_height,background='#BABABA',bd=0)
+triangle = Canvas(root,width=canvas_width,height=canvas_height,background='#F0FFF0',bd=0)
 triangle.pack()
 
-points = [20,60,40,60,30,85]
-triangle.create_polygon(points, fill='black', width=5)
+# points = [20,60,40,60,30,85]
+tom=triangle.create_polygon(points, fill='black', width=5)
 
 title=Label(root,text="Maszyna Turinga- zwiekszanie liczby rzeczysiwstej o 3",relief='groove')
 title.place(x=17,y=0)
 
 state_value=StringVar()
 state_value_label=Label(root,textvariable=state_value,relief="ridge")
-state_value_label.place(x=60,y=300)
+state_value_label.place(x=140,y=153)
 
 state_value.set("Aktualny stan:")
 
 start_button=Button(root,text="START",command=lambda:auto())
-start_button.place(x=130,y= 150)
+start_button.place(x=30,y= 150)
 
 def tape_disp(chain):
     #global sequences
@@ -139,12 +146,12 @@ def tape_disp(chain):
 
     return tape_table
 
-tape=tape_disp(sequences[0])
+tapeL=tape_disp(sequences[0])
 
 def state_disp():
     button_table=[]
     for i in range(0,12):
-        button_table.append(Button(root,text="Q"+str(i),relief=RAISED))
+        button_table.append(Button(root,text="Q"+str(i),relief=GROOVE))
         button_table[i].pack(side=LEFT)
     return button_table
 
